@@ -47,7 +47,6 @@ button {
   gap: 12px;
 }
 
-.topbar,
 .controls-panel,
 .lineup-panel {
   background: var(--panel);
@@ -57,18 +56,13 @@ button {
 }
 
 .topbar {
-  min-height: 74px;
+  position: relative;
+  min-height: 72px;
   border-radius: 8px;
-  padding: 14px 14px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.topbar-actions {
-  display: flex;
-  gap: 8px;
+  padding: 0;
+  background: #ffffff;
+  border: 0;
+  box-shadow: none;
 }
 
 .eyebrow {
@@ -121,8 +115,10 @@ h2 {
 }
 
 .lineup-manager {
+  position: relative;
   display: grid;
-  gap: 8px;
+  width: 100%;
+  gap: 0;
   border: 0;
   border-radius: 8px;
   padding: 0;
@@ -130,99 +126,117 @@ h2 {
 }
 
 .lineup-label {
+  display: none;
   color: #b6b6b8;
   font-size: 0.98rem;
   font-weight: 650;
 }
 
 .lineup-card {
-  overflow: hidden;
-  border: 1.5px solid #d3dfec;
-  border-radius: 26px;
+  position: relative;
+  overflow: visible;
+  border: 0;
+  border-radius: 8px;
   background: #ffffff;
 }
 
 .lineup-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(3, 46px);
+  grid-template-columns: minmax(0, 1fr) 54px;
   align-items: center;
-  min-height: 86px;
-  gap: 6px;
-  padding: 0 14px 0 18px;
+  min-height: 72px;
+  gap: 8px;
+  padding: 0 16px 0 20px;
   background: transparent;
 }
 
 .lineup-manager select {
   min-width: 0;
-  height: 86px;
+  height: 72px;
   border: 0;
   border-radius: 0;
-  padding: 0 42px 0 0;
+  padding: 0 38px 0 0;
   appearance: none;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 24 24' fill='none' stroke='%23344555' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") right 4px center / 34px 34px no-repeat;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='%23344555' stroke-width='2.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") right 2px center / 28px 28px no-repeat;
   color: var(--ink);
-  font-size: 1.55rem;
+  font-size: 1.35rem;
   font-weight: 900;
 }
 
-.lineup-icon-button {
-  width: 46px;
-  height: 52px;
+.lineup-menu-button {
+  width: 54px;
+  height: 54px;
   border: 0;
   border-radius: 8px;
   background: transparent;
   color: #344555;
-  font-size: 1.12rem;
+  font-size: 1.25rem;
   font-weight: 900;
   display: grid;
   place-items: center;
 }
 
-.lineup-icon-button svg {
-  width: 34px;
-  height: 34px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.lineup-menu-button span {
+  letter-spacing: 0.18em;
+  transform: translateX(0.08em);
 }
 
-.lineup-icon-button.danger {
-  background: transparent;
-  color: #f85f62;
-}
-
-.lineup-icon-button.danger:disabled {
-  color: #f85f62;
-  opacity: 0.42;
-}
-
-.lineup-icon-button:disabled {
-  color: rgba(52, 69, 85, 0.32);
-  background: transparent;
-}
-
-.lineup-add-button {
-  width: 100%;
-  min-height: 64px;
-  border: 0;
-  border-radius: 0;
+.lineup-menu {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 8px);
+  right: 10px;
+  min-width: 190px;
+  border: 1px solid rgba(60, 60, 67, 0.14);
+  border-radius: 12px;
+  padding: 6px;
   display: grid;
-  place-items: center;
-  background: #22c55e;
-  color: #ffffff;
-  font-size: 3.25rem;
-  font-weight: 300;
-  line-height: 1;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(16px);
+}
+
+.lineup-menu[hidden] {
+  display: none;
+}
+
+.lineup-menu button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  font-size: 0.96rem;
+  font-weight: 800;
+}
+
+.lineup-menu button:active {
+  background: rgba(118, 118, 128, 0.12);
+}
+
+.lineup-menu button.danger {
+  color: #f85f62;
+}
+
+.lineup-menu button:disabled {
+  opacity: 0.38;
 }
 
 .lineup-status {
-  min-height: 1em;
+  position: absolute;
+  z-index: 70;
+  top: calc(100% + 4px);
+  left: 12px;
+  right: 12px;
+  min-height: 0;
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 800;
+  pointer-events: none;
 }
 
 .lineup-modal {
@@ -325,6 +339,11 @@ h2 {
   color: var(--ink);
 }
 
+.lineup-modal-actions .danger-action {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .rotation-strip,
 .formation-strip {
   display: grid;
@@ -423,6 +442,8 @@ h2 {
 .court-wrap {
   border-radius: 8px;
   padding: 10px;
+  display: grid;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.72);
   box-shadow: var(--shadow);
   border: 1px solid rgba(255, 255, 255, 0.72);
@@ -441,6 +462,25 @@ h2 {
   overflow: hidden;
   touch-action: pan-y;
   background: linear-gradient(180deg, #e8f1fb 0%, #f8fbff 50%, #e8f1fb 100%);
+}
+
+.court-undo-button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(118, 118, 128, 0.12);
+  color: var(--ink);
+  font-size: 0.96rem;
+  font-weight: 850;
+}
+
+.court-undo-button:disabled {
+  color: rgba(60, 60, 67, 0.34);
+  opacity: 0.72;
 }
 
 .court::before {
@@ -569,6 +609,7 @@ h2 {
 }
 
 .player-chip {
+  position: relative;
   border: 0;
   border-radius: 999px;
   color: #ffffff;
@@ -672,6 +713,23 @@ h2 {
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(60, 60, 67, 0.24);
   font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.bench-edit {
+  position: absolute;
+  top: -10px;
+  left: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  color: #64748b;
+  box-shadow: 0 6px 14px rgba(60, 60, 67, 0.22);
+  font-size: 0.82rem;
   font-weight: 900;
   line-height: 1;
 }
@@ -1046,6 +1104,20 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.bench-add-player {
+  width: 104px;
+  min-height: 48px;
+  border: 3px solid #a7b4c6;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #d7e0eb;
+  color: #9aa8ba;
+  font-size: 2.7rem;
+  font-weight: 300;
+  line-height: 0.8;
 }
 
 .empty-note {

@@ -89,19 +89,19 @@ const court = document.querySelector("#court");
 const courtPlayers = document.querySelector("#courtPlayers");
 const benchZone = document.querySelector("#benchZone");
 const benchList = document.querySelector("#benchList");
-const rosterList = document.querySelector("#rosterList");
 const chipTemplate = document.querySelector("#playerChipTemplate");
 const addPlayerForm = document.querySelector("#addPlayerForm");
-const openAddPlayerButton = document.querySelector("#openAddPlayerButton");
 const addPlayerDialog = document.querySelector("#addPlayerDialog");
 const playerFirstNameInput = document.querySelector("#playerFirstNameInput");
 const playerLastNameInput = document.querySelector("#playerLastNameInput");
 const playerNumberInput = document.querySelector("#playerNumberInput");
 const playerPositionInput = document.querySelector("#playerPositionInput");
 const cancelAddPlayerButton = document.querySelector("#cancelAddPlayerButton");
-const resetPlayersButton = document.querySelector("#resetPlayersButton");
+const deletePlayerDialogButton = document.querySelector("#deletePlayerDialogButton");
 const undoButton = document.querySelector("#undoButton");
 const lineupSelect = document.querySelector("#lineupSelect");
+const lineupMenuButton = document.querySelector("#lineupMenuButton");
+const lineupMenu = document.querySelector("#lineupMenu");
 const newLineupButton = document.querySelector("#newLineupButton");
 const renameLineupButton = document.querySelector("#renameLineupButton");
 const shareLineupButton = document.querySelector("#shareLineupButton");
@@ -127,16 +127,6 @@ const savePlayerDialogButton = document.querySelector("#savePlayerDialogButton")
 const liberoWarning = document.querySelector("#liberoWarning");
 const coachCheckCount = document.querySelector("#coachCheckCount");
 const coachCheckList = document.querySelector("#coachCheckList");
-
-const trashIcon = `
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M4 7h16" />
-    <path d="M9 7V5.5A2.5 2.5 0 0 1 11.5 3h1A2.5 2.5 0 0 1 15 5.5V7" />
-    <path d="M7 7l1 13h8l1-13" />
-    <path d="M10 11v6" />
-    <path d="M14 11v6" />
-  </svg>
-`;
 
 const subPicker = document.createElement("div");
 subPicker.className = "sub-picker";
@@ -735,6 +725,7 @@ function createChip(player, placement) {
   chip.querySelector(".player-name").textContent = initials(player);
   chip.querySelector(".player-position").textContent = player.position;
   chip.querySelector(".home-remove")?.remove();
+  chip.querySelector(".bench-edit")?.remove();
   const homeRow = homeRowFor(player.id);
   chip.classList.toggle("libero", player.position === "L");
   chip.classList.toggle("home-fixed", isHomePhase());
@@ -759,6 +750,7 @@ function createChip(player, placement) {
     chip.classList.remove("on-court");
     chip.style.left = "";
     chip.style.top = "";
+    chip.append(createBenchEditControl(player.id));
   }
 
   return chip;
@@ -780,6 +772,7 @@ function renderPlayers() {
   });
 
   benchList.querySelector(".empty-note")?.remove();
+  benchList.querySelector(".bench-add-player")?.remove();
 
   state.players.forEach((player) => {
     const placement = placements[player.id];
@@ -791,15 +784,41 @@ function renderPlayers() {
     }
   });
 
-  if (!benchList.querySelector(".player-chip")) {
-    const note = document.createElement("div");
-    note.className = "empty-note";
-    note.textContent = "Everyone is placed for this formation.";
-    benchList.append(note);
-  }
+  benchList.append(createBenchAddButton());
 
   renderHomeOpenSlots();
   renderLiberoWarning();
+}
+
+function createBenchAddButton() {
+  const button = document.createElement("button");
+  button.className = "bench-add-player";
+  button.type = "button";
+  button.textContent = "+";
+  button.setAttribute("aria-label", "Add player");
+  button.addEventListener("click", () => openPlayerDialog());
+  return button;
+}
+
+function createBenchEditControl(playerId) {
+  const control = document.createElement("span");
+  control.className = "bench-edit";
+  control.role = "button";
+  control.tabIndex = 0;
+  control.textContent = "✎";
+  control.setAttribute("aria-label", `Edit ${fullName(playerById(playerId))}`);
+  control.addEventListener("pointerdown", (event) => event.stopPropagation());
+  control.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openPlayerDialog(playerId);
+  });
+  control.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openPlayerDialog(playerId);
+    }
+  });
+  return control;
 }
 
 function createHomeRemoveControl(playerId) {
@@ -975,53 +994,6 @@ function renderCoachCheck() {
   });
 }
 
-function renderRosterEditor() {
-  rosterList.innerHTML = "";
-
-  state.players.forEach((player) => {
-    const row = document.createElement("div");
-    row.className = "roster-row";
-    row.classList.toggle("highlighted-row", state.highlightedPlayerId === player.id);
-
-    const summary = document.createElement("div");
-    summary.className = "roster-summary";
-    const number = document.createElement("span");
-    number.className = "roster-mini-number";
-    number.textContent = player.number;
-    const identity = document.createElement("span");
-    identity.className = "roster-mini-identity";
-    identity.textContent = rosterDisplayName(player);
-    identity.title = fullName(player);
-    const position = document.createElement("span");
-    position.className = "roster-mini-position";
-    position.textContent = player.position || "Pos";
-    summary.append(number, identity, position);
-
-    const editButton = document.createElement("button");
-    editButton.className = "edit-player";
-    editButton.type = "button";
-    editButton.textContent = "✎";
-    editButton.setAttribute("aria-label", `Edit ${fullName(player)}`);
-    editButton.addEventListener("click", () => openPlayerDialog(player.id));
-
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "delete-player";
-    deleteButton.type = "button";
-    deleteButton.classList.toggle("confirming", pendingDeletePlayerId === player.id);
-    deleteButton.textContent = pendingDeletePlayerId === player.id ? "✓" : "×";
-    deleteButton.setAttribute(
-      "aria-label",
-      pendingDeletePlayerId === player.id ? `Confirm delete ${fullName(player)}` : `Delete ${fullName(player)}`,
-    );
-    deleteButton.addEventListener("click", () => {
-      requestDeletePlayer(player.id);
-    });
-
-    row.append(summary, editButton, deleteButton);
-    rosterList.append(row);
-  });
-}
-
 function renderLineupManager() {
   const active = activeLineup();
   lineupSelect.innerHTML = "";
@@ -1036,8 +1008,19 @@ function renderLineupManager() {
   }
   deleteLineupButton.disabled = lineupLibrary.lineups.length <= 1;
   const confirmingDelete = pendingDeleteLineupId === active?.id;
-  deleteLineupButton.innerHTML = confirmingDelete ? "✓" : trashIcon;
+  deleteLineupButton.textContent = confirmingDelete ? "Confirm delete" : "Delete";
   deleteLineupButton.setAttribute("aria-label", confirmingDelete ? "Confirm delete lineup" : "Delete lineup");
+}
+
+function closeLineupMenu() {
+  lineupMenu.hidden = true;
+  lineupMenuButton.setAttribute("aria-expanded", "false");
+}
+
+function toggleLineupMenu() {
+  const willOpen = lineupMenu.hidden;
+  lineupMenu.hidden = !willOpen;
+  lineupMenuButton.setAttribute("aria-expanded", String(willOpen));
 }
 
 function setLineupStatus(message) {
@@ -1146,6 +1129,8 @@ function openPlayerDialog(playerId = null) {
   pendingDeletePlayerId = null;
   playerDialogTitle.textContent = player ? "Edit player" : "Add player";
   savePlayerDialogButton.textContent = player ? "Save player" : "Add player";
+  deletePlayerDialogButton.hidden = !player;
+  deletePlayerDialogButton.textContent = "Delete";
   playerFirstNameInput.value = player?.firstName ?? "";
   playerLastNameInput.value = player?.lastName ?? "";
   playerNumberInput.value = player?.number ?? "";
@@ -1156,6 +1141,7 @@ function openPlayerDialog(playerId = null) {
 
 function closePlayerDialog() {
   editingPlayerId = null;
+  pendingDeletePlayerId = null;
   addPlayerDialog.hidden = true;
 }
 
@@ -1296,7 +1282,6 @@ function render() {
   renderTabs();
   renderPlayers();
   renderCoachCheck();
-  renderRosterEditor();
 }
 
 function playRotationCue() {
@@ -1551,12 +1536,20 @@ addPlayerForm.addEventListener("submit", (event) => {
   render();
 });
 
-openAddPlayerButton.addEventListener("click", () => {
-  openPlayerDialog();
-});
-
 cancelAddPlayerButton.addEventListener("click", () => {
   closePlayerDialog();
+});
+
+deletePlayerDialogButton.addEventListener("click", () => {
+  if (!editingPlayerId) return;
+  if (pendingDeletePlayerId !== editingPlayerId) {
+    pendingDeletePlayerId = editingPlayerId;
+    deletePlayerDialogButton.textContent = "Confirm delete";
+    return;
+  }
+  const playerId = editingPlayerId;
+  closePlayerDialog();
+  deletePlayer(playerId);
 });
 
 addPlayerDialog.addEventListener("click", (event) => {
@@ -1566,11 +1559,39 @@ addPlayerDialog.addEventListener("click", (event) => {
 });
 
 undoButton.addEventListener("click", undoLastAction);
-lineupSelect.addEventListener("change", () => switchLineup(lineupSelect.value));
-newLineupButton.addEventListener("click", openNewLineupDialog);
-renameLineupButton.addEventListener("click", openRenameLineupDialog);
-shareLineupButton.addEventListener("click", shareCurrentLineup);
-deleteLineupButton.addEventListener("click", deleteCurrentLineup);
+lineupSelect.addEventListener("change", () => {
+  closeLineupMenu();
+  switchLineup(lineupSelect.value);
+});
+lineupMenuButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleLineupMenu();
+});
+lineupMenu.addEventListener("click", (event) => event.stopPropagation());
+newLineupButton.addEventListener("click", () => {
+  closeLineupMenu();
+  openNewLineupDialog();
+});
+renameLineupButton.addEventListener("click", () => {
+  closeLineupMenu();
+  openRenameLineupDialog();
+});
+shareLineupButton.addEventListener("click", () => {
+  closeLineupMenu();
+  shareCurrentLineup();
+});
+deleteLineupButton.addEventListener("click", () => {
+  if (pendingDeleteLineupId === activeLineup()?.id) {
+    closeLineupMenu();
+  }
+  deleteCurrentLineup();
+});
+document.addEventListener("click", closeLineupMenu);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeLineupMenu();
+  }
+});
 cancelNewLineupButton.addEventListener("click", closeNewLineupDialog);
 newLineupDialog.addEventListener("click", (event) => {
   if (event.target === newLineupDialog) {
@@ -1608,42 +1629,6 @@ shareLineupDialog.addEventListener("click", (event) => {
     closeShareLineupDialog();
   }
 });
-
-resetPlayersButton.addEventListener("click", () => {
-  const confirmed = window.confirm(
-    "Reset all players and rotations? This will clear your roster and lineup. You can use Undo right after if needed.",
-  );
-  if (!confirmed) return;
-
-  commitAction(() => {
-    state.rotation = 1;
-    state.formation = "home";
-    state.highlightedPlayerId = null;
-    state.homeOverrides = {};
-    state.phaseOverrides = {};
-    state.players = createInitialPlayers();
-    state.placements = {};
-    chipCache.forEach((chip) => chip.remove());
-    chipCache.clear();
-    for (let rotation = 1; rotation <= 6; rotation += 1) {
-      seedRotation(rotation);
-    }
-    syncHomeRotations();
-  });
-  closeSubPicker();
-  render();
-});
-
-function requestDeletePlayer(playerId) {
-  if (pendingDeletePlayerId !== playerId) {
-    pendingDeletePlayerId = playerId;
-    renderRosterEditor();
-    setLineupStatus("Tap check to delete this player.");
-    return;
-  }
-  pendingDeletePlayerId = null;
-  deletePlayer(playerId);
-}
 
 function deletePlayer(playerId) {
   commitAction(() => {
