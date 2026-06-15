@@ -44,7 +44,7 @@ button {
   margin: 0 auto;
   padding: max(14px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom));
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .controls-panel,
@@ -441,9 +441,9 @@ h2 {
 
 .court-wrap {
   border-radius: 8px;
-  padding: 10px;
+  padding: 8px;
   display: grid;
-  gap: 10px;
+  gap: 8px;
   background: rgba(255, 255, 255, 0.72);
   box-shadow: var(--shadow);
   border: 1px solid rgba(255, 255, 255, 0.72);
@@ -455,8 +455,8 @@ h2 {
   position: relative;
   width: 100%;
   aspect-ratio: 7 / 10;
-  max-height: 58dvh;
-  min-height: 390px;
+  max-height: 52dvh;
+  min-height: 340px;
   border: 1px solid rgba(255, 255, 255, 0.74);
   border-radius: 8px;
   overflow: hidden;
@@ -521,11 +521,11 @@ h2 {
 .net {
   position: absolute;
   z-index: 1;
-  top: 50%;
+  top: var(--runoff-y);
   left: var(--runoff-x);
   right: var(--runoff-x);
   height: 12px;
-  transform: translateY(-50%);
+  transform: none;
   background:
     repeating-linear-gradient(90deg, rgba(15, 23, 42, 0.42) 0 10px, rgba(255, 255, 255, 0.9) 10px 12px),
     #0f172a;
@@ -542,12 +542,8 @@ h2 {
   background: var(--court-line);
 }
 
-.attack-line.top {
-  top: 28.8%;
-}
-
 .attack-line.bottom {
-  top: 71.2%;
+  top: 50%;
 }
 
 .court-label,
@@ -567,7 +563,7 @@ h2 {
 }
 
 .court-label-top {
-  top: calc(var(--runoff-y) + 8px);
+  top: calc(var(--runoff-y) + 20px);
 }
 
 .court-label-bottom {
@@ -720,7 +716,7 @@ h2 {
 .bench-edit {
   position: absolute;
   top: -10px;
-  left: -8px;
+  right: -8px;
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -937,9 +933,9 @@ h2 {
 
 .lineup-panel {
   border-radius: 8px;
-  padding: 12px;
+  padding: 8px;
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .panel-header {
@@ -967,7 +963,7 @@ h2 {
 }
 
 .bench-zone {
-  min-height: 108px;
+  min-height: 96px;
   border: 1px dashed rgba(60, 60, 67, 0.28);
   border-radius: 8px;
   padding: 10px;

@@ -144,7 +144,7 @@ function createInitialPlayers() {
   return [];
 }
 
-function renderPositionOptions(select, placeholder = "Position") {
+function renderPositionOptions(select, placeholder = "No position") {
   select.innerHTML = "";
   positionOptions.forEach((position) => {
     const option = document.createElement("option");
@@ -291,6 +291,12 @@ function initials(player) {
   return `${first}${last}`.toUpperCase() || "?";
 }
 
+function normalizePlayerNumber(value, fallback = "") {
+  const digits = String(value ?? "").replace(/\D/g, "").slice(0, 2);
+  if (!digits) return fallback;
+  return String(Math.min(99, Math.max(0, Number(digits))));
+}
+
 function rosterDisplayName(player) {
   const firstName = player.firstName?.trim();
   const lastInitial = player.lastName?.trim().charAt(0);
@@ -433,6 +439,11 @@ function formationLabel(formationId) {
 
 function legalityWarnings(rotation = state.rotation, formation = state.formation) {
   const warnings = [];
+  const onCourtCount = placedPlayers(rotation, formation).length;
+
+  if (onCourtCount > 6) {
+    warnings.push(`${formationLabel(formation)} R${rotation}: ${onCourtCount} players are on the court. Limit is 6.`);
+  }
 
   const liberoNames = state.players
     .filter((player) => player.position === "L" && homeRowFor(player.id, rotation) === "front")
@@ -1510,7 +1521,7 @@ addPlayerForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const firstName = playerFirstNameInput.value.trim();
   const lastName = playerLastNameInput.value.trim();
-  const number = playerNumberInput.value.replace(/\D/g, "").slice(0, 2);
+  const number = normalizePlayerNumber(playerNumberInput.value);
   const position = playerPositionInput.value;
   if (!firstName && !lastName && !number) return;
 
@@ -1519,7 +1530,7 @@ addPlayerForm.addEventListener("submit", (event) => {
     if (editedPlayer) {
       editedPlayer.firstName = firstName || "Player";
       editedPlayer.lastName = lastName;
-      editedPlayer.number = number || editedPlayer.number || "";
+      editedPlayer.number = number || normalizePlayerNumber(editedPlayer.number);
       editedPlayer.position = position;
       return;
     }
@@ -1528,12 +1539,16 @@ addPlayerForm.addEventListener("submit", (event) => {
       id: makeId(),
       firstName: firstName || "Player",
       lastName,
-      number: number || state.players.length + 1,
+      number: number || normalizePlayerNumber(state.players.length + 1, "0"),
       position,
     });
   });
   closePlayerDialog();
   render();
+});
+
+playerNumberInput.addEventListener("input", () => {
+  playerNumberInput.value = playerNumberInput.value.replace(/\D/g, "").slice(0, 2);
 });
 
 cancelAddPlayerButton.addEventListener("click", () => {

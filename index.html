@@ -47,7 +47,6 @@
         <div class="court-wrap">
           <div class="court" id="court" aria-label="Drag players onto the volleyball court">
             <div class="net" aria-hidden="true"></div>
-            <div class="attack-line top" aria-hidden="true"></div>
             <div class="attack-line bottom" aria-hidden="true"></div>
             <div class="court-label court-label-top">Front row</div>
             <div class="court-label court-label-bottom">Back row</div>
@@ -67,13 +66,6 @@
       </section>
 
       <section class="lineup-panel" aria-label="Roster and bench">
-        <div class="panel-header">
-          <div>
-            <p class="eyebrow">Team</p>
-            <h2>Roster</h2>
-          </div>
-        </div>
-
         <div class="bench-zone" id="benchZone">
           <div class="bench-title">
             <span>Bench</span>
@@ -147,7 +139,7 @@
         </div>
         <input id="playerFirstNameInput" name="playerFirstName" autocomplete="given-name" placeholder="First name" aria-label="New player first name" />
         <input id="playerLastNameInput" name="playerLastName" autocomplete="family-name" placeholder="Last name" aria-label="New player last name" />
-        <input id="playerNumberInput" name="playerNumber" inputmode="numeric" placeholder="Number" aria-label="New player number" />
+        <input id="playerNumberInput" name="playerNumber" inputmode="numeric" maxlength="2" placeholder="Number" aria-label="New player number" />
         <select id="playerPositionInput" name="playerPosition" aria-label="New player position"></select>
         <div class="lineup-modal-actions">
           <button id="savePlayerDialogButton" type="submit">Add player</button>
@@ -167,6 +159,6 @@
       </button>
     </template>
 
-    <script src="app.js?v=bench-roster-1"></script>
+    <script src="app.js?v=half-court-1"></script>
   </body>
 </html>
