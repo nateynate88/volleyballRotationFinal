@@ -2,7 +2,7 @@ const formations = [
   { id: "home", label: "Home" },
   { id: "serve", label: "Serve" },
   { id: "receive", label: "Receive" },
-  { id: "defense", label: "Base/Defense" },
+  { id: "defense", label: "Base" },
 ];
 
 const positionOptions = ["", "S", "OH", "MB", "OPP", "L", "DS"];
