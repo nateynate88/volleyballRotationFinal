@@ -82,6 +82,7 @@ let lineupLibrary = {
 let pendingDeleteLineupId = null;
 let pendingDeletePlayerId = null;
 let editingPlayerId = null;
+let coachCheckExpanded = false;
 
 const rotationStrip = document.querySelector("#rotationStrip");
 const formationStrip = document.querySelector("#formationStrip");
@@ -125,6 +126,8 @@ const closeShareLineupButton = document.querySelector("#closeShareLineupButton")
 const playerDialogTitle = document.querySelector("#playerDialogTitle");
 const savePlayerDialogButton = document.querySelector("#savePlayerDialogButton");
 const liberoWarning = document.querySelector("#liberoWarning");
+const coachCheck = document.querySelector(".coach-check");
+const coachCheckToggle = document.querySelector("#coachCheckToggle");
 const coachCheckCount = document.querySelector("#coachCheckCount");
 const coachCheckList = document.querySelector("#coachCheckList");
 
@@ -981,12 +984,13 @@ function renderCoachCheck() {
       : "Ready";
   coachCheckCount.classList.toggle("has-issues", currentWarnings.length > 0);
   coachCheckCount.classList.toggle("has-notes", !currentWarnings.length && currentNotes.length > 0);
+  if (totalMessages) {
+    coachCheckExpanded = true;
+  }
+  coachCheck.classList.toggle("expanded", coachCheckExpanded && totalMessages > 0);
+  coachCheckToggle.setAttribute("aria-expanded", String(coachCheckExpanded && totalMessages > 0));
 
   if (!totalMessages) {
-    const item = document.createElement("div");
-    item.className = "coach-check-item ok";
-    item.textContent = "No libero or overlap issues.";
-    coachCheckList.append(item);
     return;
   }
 
@@ -1574,6 +1578,13 @@ addPlayerDialog.addEventListener("click", (event) => {
 });
 
 undoButton.addEventListener("click", undoLastAction);
+coachCheckToggle.addEventListener("click", () => {
+  const hasMessages = coachCheckList.children.length > 0;
+  if (!hasMessages) return;
+  coachCheckExpanded = !coachCheckExpanded;
+  coachCheck.classList.toggle("expanded", coachCheckExpanded);
+  coachCheckToggle.setAttribute("aria-expanded", String(coachCheckExpanded));
+});
 lineupSelect.addEventListener("change", () => {
   closeLineupMenu();
   switchLineup(lineupSelect.value);

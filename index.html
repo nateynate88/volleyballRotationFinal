@@ -35,10 +35,10 @@
         <div class="formation-strip" id="formationStrip" role="tablist" aria-label="Formations"></div>
         <div class="libero-warning" id="liberoWarning" role="status" aria-live="polite" hidden></div>
         <div class="coach-check" aria-label="Coach check">
-          <div class="bench-title">
+          <button class="coach-check-toggle" id="coachCheckToggle" type="button" aria-expanded="false">
             <span>Coach Check</span>
             <small id="coachCheckCount">Ready</small>
-          </div>
+          </button>
           <div class="coach-check-list" id="coachCheckList"></div>
         </div>
       </section>
@@ -57,11 +57,11 @@
             <div class="zone-label zone-6">6</div>
             <div class="zone-label zone-1">1</div>
             <div id="courtPlayers"></div>
+            <button class="court-undo-button" id="undoButton" aria-label="Undo last action" disabled>
+              <span aria-hidden="true">↺</span>
+              <span>Undo</span>
+            </button>
           </div>
-          <button class="court-undo-button" id="undoButton" aria-label="Undo last action" disabled>
-            <span aria-hidden="true">↺</span>
-            <span>Undo</span>
-          </button>
         </div>
       </section>
 
@@ -159,6 +159,6 @@
       </button>
     </template>
 
-    <script src="app.js?v=compact-formations-1"></script>
+    <script src="app.js?v=court-bottom-space-1"></script>
   </body>
 </html>
