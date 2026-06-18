@@ -83,6 +83,7 @@ let pendingDeleteLineupId = null;
 let pendingDeletePlayerId = null;
 let editingPlayerId = null;
 let coachCheckExpanded = false;
+let newPlayerHomeSlot = null;
 
 const rotationStrip = document.querySelector("#rotationStrip");
 const formationStrip = document.querySelector("#formationStrip");
@@ -489,9 +490,9 @@ function phasePlacementFor(player, rotation, formation) {
   return state.placements[keyFor(rotation, formation)]?.[player.id];
 }
 
-function overlapWarnings(rotation, formation) {
+function overlapIssues(rotation, formation) {
   const zones = playersByHomeZone(rotation);
-  const warnings = [];
+  const issues = [];
   const serverZoneIsExempt = formation === "serve";
 
   overlapChecks.forEach((check) => {
@@ -504,9 +505,10 @@ function overlapWarnings(rotation, formation) {
       if (!frontPlayer || !backPlayer || !frontPlacement || !backPlacement) return;
 
       if (frontPlacement.y >= backPlacement.y) {
-        warnings.push(
-          `${formationLabel(formation)} overlap R${rotation}: ${initials(frontPlayer)} must stay in front of ${initials(backPlayer)}.`,
-        );
+        issues.push({
+          playerIds: [frontPlayer.id, backPlayer.id],
+          message: `${formationLabel(formation)} overlap R${rotation}: ${initials(frontPlayer)} must stay in front of ${initials(backPlayer)}.`,
+        });
       }
       return;
     }
@@ -519,13 +521,23 @@ function overlapWarnings(rotation, formation) {
     if (!leftPlayer || !rightPlayer || !leftPlacement || !rightPlacement) return;
 
     if (leftPlacement.x >= rightPlacement.x) {
-      warnings.push(
-        `${formationLabel(formation)} overlap R${rotation}: ${initials(leftPlayer)} must stay left of ${initials(rightPlayer)}.`,
-      );
+      issues.push({
+        playerIds: [leftPlayer.id, rightPlayer.id],
+        message: `${formationLabel(formation)} overlap R${rotation}: ${initials(leftPlayer)} must stay left of ${initials(rightPlayer)}.`,
+      });
     }
   });
 
-  return warnings;
+  return issues;
+}
+
+function overlapWarnings(rotation, formation) {
+  return overlapIssues(rotation, formation).map((issue) => issue.message);
+}
+
+function overlapPlayerIds(rotation = state.rotation, formation = state.formation) {
+  if (formation !== "serve" && formation !== "receive") return new Set();
+  return new Set(overlapIssues(rotation, formation).flatMap((issue) => issue.playerIds));
 }
 
 function isBenchPlayer(playerId) {
@@ -741,11 +753,13 @@ function createChip(player, placement) {
   chip.querySelector(".home-remove")?.remove();
   chip.querySelector(".bench-edit")?.remove();
   const homeRow = homeRowFor(player.id);
+  const overlapIds = overlapPlayerIds();
   chip.classList.toggle("libero", player.position === "L");
   chip.classList.toggle("home-fixed", isHomePhase());
   chip.classList.toggle("front-row-player", Boolean(placement) && homeRow === "front");
   chip.classList.toggle("back-row-player", Boolean(placement) && homeRow === "back");
   chip.classList.toggle("libero-front-warning", player.position === "L" && homeRow === "front");
+  chip.classList.toggle("overlap-warning", Boolean(placement) && overlapIds.has(player.id));
   chip.classList.toggle("highlighted", state.highlightedPlayerId === player.id);
   chip.classList.toggle("dimmed", Boolean(state.highlightedPlayerId) && state.highlightedPlayerId !== player.id);
   chip.setAttribute(
@@ -919,6 +933,20 @@ function openSubPicker(zoneIndex) {
   closeButton.addEventListener("click", closeSubPicker);
   header.append(title, closeButton);
   subPicker.append(header);
+
+  const createButton = document.createElement("button");
+  createButton.className = "sub-picker-create";
+  createButton.type = "button";
+  createButton.innerHTML = `
+    <span>Create new player</span>
+    <small>+</small>
+  `;
+  createButton.addEventListener("click", () => {
+    newPlayerHomeSlot = zoneIndex;
+    closeSubPicker();
+    openPlayerDialog();
+  });
+  subPicker.append(createButton);
 
   if (!benchPlayers.length) {
     const empty = document.createElement("div");
@@ -1157,6 +1185,7 @@ function openPlayerDialog(playerId = null) {
 function closePlayerDialog() {
   editingPlayerId = null;
   pendingDeletePlayerId = null;
+  newPlayerHomeSlot = null;
   addPlayerDialog.hidden = true;
 }
 
@@ -1539,13 +1568,21 @@ addPlayerForm.addEventListener("submit", (event) => {
       return;
     }
 
-    state.players.push({
+    const newPlayer = {
       id: makeId(),
       firstName: firstName || "Player",
       lastName,
       number: number || normalizePlayerNumber(state.players.length + 1, "0"),
       position,
-    });
+    };
+    state.players.push(newPlayer);
+
+    if (newPlayerHomeSlot !== null && isHomePhase()) {
+      const zone = defaultZones[newPlayerHomeSlot];
+      currentPlacements()[newPlayer.id] = { x: zone.x, y: zone.y };
+      markHomeOverrideForSlot(newPlayerHomeSlot);
+      syncAfterHomeChange();
+    }
   });
   closePlayerDialog();
   render();
